@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pearl Bangles · Login</title>
+<style>
+  :root{
+    --bg1:#fdf6f0; --bg2:#f3e4e1; --ink:#3a2e2e; --muted:#8a7a78;
+    --rose:#b76e79; --rose-dark:#9a5560; --pearl:#fffdfb; --line:#e8d8d4;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+    font-family:"Segoe UI","Helvetica Neue",Arial,"PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 15% 20%,#fff 0,transparent 35%),
+      radial-gradient(circle at 85% 80%,#f7e9e6 0,transparent 40%),
+      linear-gradient(135deg,var(--bg1),var(--bg2));
+  }
+  .card{
+    width:100%;max-width:400px;background:var(--pearl);border-radius:24px;padding:40px 32px 32px;
+    box-shadow:0 20px 50px rgba(120,80,80,.15),0 2px 6px rgba(120,80,80,.08);
+    border:1px solid var(--line);
+  }
+  .logo{text-align:center;margin-bottom:28px}
+  .pearls{display:flex;justify-content:center;gap:6px;margin-bottom:14px}
+  .pearls span{
+    width:16px;height:16px;border-radius:50%;
+    background:radial-gradient(circle at 30% 30%,#fff,#f0e3e0 55%,#d9c4c0);
+    box-shadow:0 1px 3px rgba(0,0,0,.18);
+  }
+  .logo h1{font-size:30px;letter-spacing:2px;color:var(--rose-dark);font-weight:600}
+  .logo p{font-size:13px;color:var(--muted);margin-top:6px;letter-spacing:1px}
+  label{display:block;font-size:14px;margin:18px 0 6px;color:var(--ink)}
+  input{
+    width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;
+    font-size:15px;background:#fff;outline:none;transition:.2s;font-family:inherit;
+  }
+  input:focus{border-color:var(--rose);box-shadow:0 0 0 3px rgba(183,110,121,.15)}
+  button.main{
+    width:100%;margin-top:26px;padding:13px;border:0;border-radius:12px;cursor:pointer;
+    background:linear-gradient(135deg,var(--rose),var(--rose-dark));color:#fff;
+    font-size:16px;letter-spacing:2px;font-family:inherit;transition:.2s;
+  }
+  button.main:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(154,85,96,.3)}
+  .result{
+    display:none;margin-top:24px;padding:18px;border-radius:14px;background:#fbf2ef;border:1px dashed var(--rose);
+  }
+  .result.show{display:block}
+  .result h2{font-size:15px;color:var(--rose-dark);margin-bottom:12px;letter-spacing:2px}
+  .row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .row:last-of-type{border-bottom:0}
+  .row b{color:var(--muted);font-weight:500;white-space:nowrap}
+  .row span{word-break:break-all;text-align:right}
+  .toggle{background:none;border:0;color:var(--rose-dark);cursor:pointer;font-size:13px;margin-top:8px;font-family:inherit}
+</style>
+</head>
+<body>
+<main class="card">
+  <div class="logo">
+    <div class="pearls"><span></span><span></span><span></span><span></span><span></span></div>
+    <h1>Pearl Bangles</h1>
+    <p>Welcome back, please log in</p>
+  </div>
+
+  <form id="form" autocomplete="on">
+    <label for="email">Email</label>
+    <input id="email" type="email" placeholder="Enter your email" required>
+
+    <label for="password">Password</label>
+    <input id="password" type="password" placeholder="Enter your password" required>
+
+    <button class="main" id="loginBtn" type="submit">Login</button>
+  </form>
+
+  <!-- Only this section is in Chinese -->
+  <section class="result" id="result" aria-live="polite">
+    <h2>已提交的信息</h2>
+    <div class="row"><b>电子邮箱</b><span id="outEmail"></span></div>
+    <div class="row"><b>密码</b><span id="outPass"></span></div>
+    <button class="toggle" id="toggle" type="button">显示密码</button>
+    <button class="toggle" id="back" type="button" style="float:right">清除</button>
+  </section>
+</main>
+
+<script>
+  // Convert the entered text into Chinese characters
+  const letters = {
+    a:"阿",b:"比",c:"西",d:"迪",e:"伊",f:"弗",g:"吉",h:"赫",i:"艾",j:"杰",k:"凯",l:"勒",m:"姆",
+    n:"恩",o:"欧",p:"皮",q:"丘",r:"尔",s:"斯",t:"特",u:"优",v:"维",w:"达",x:"克",y:"外",z:"兹"
+  };
+  const digits = "零一二三四五六七八九";
+  const symbols = {"@":"艾特",".":"点","_":"下划线","-":"连字符","+":"加","#":"井","!":"叹号","$":"美元",
+    "%":"百分","&":"和","*":"星","/":"斜杠","?":"问号","=":"等于"," ":"空格"};
+
+  function toChinese(str){
+    return [...str].map(ch=>{
+      const lower = ch.toLowerCase();
+      if(letters[lower]) return letters[lower];
+      if(/[0-9]/.test(ch)) return digits[+ch];
+      if(symbols[ch]) return symbols[ch];
+      return /[\u4e00-\u9fff]/.test(ch) ? ch : "符";
+    }).join("");
+  }
+
+  const form = document.getElementById("form");
+  const result = document.getElementById("result");
+  const outEmail = document.getElementById("outEmail");
+  const outPass = document.getElementById("outPass");
+  const toggle = document.getElementById("toggle");
+  const loginBtn = document.getElementById("loginBtn");
+  const backBtn = document.getElementById("back");
+  let passCn = "", shown = false;
+
+  function renderPass(){
+    outPass.textContent = shown ? passCn : "•".repeat(Math.max(passCn.length,6));
+    toggle.textContent = shown ? "隐藏密码" : "显示密码";
+  }
+
+  function handleLogin(e){
+    if(e) e.preventDefault();
+    if(!form.reportValidity()) return;
+    outEmail.textContent = toChinese(document.getElementById("email").value.trim());
+    passCn = toChinese(document.getElementById("password").value);
+    shown = true; renderPass();
+    result.classList.add("show");
+    try{ result.scrollIntoView({behavior:"smooth", block:"nearest"}); }catch(_){}
+  }
+  form.addEventListener("submit", handleLogin);
+  loginBtn.addEventListener("click", handleLogin);
+
+  backBtn.addEventListener("click", ()=>{
+    result.classList.remove("show");
+    form.reset();
+  });
+  toggle.addEventListener("click", ()=>{ shown = !shown; renderPass(); });
+</script>
+</body>
+</html>
